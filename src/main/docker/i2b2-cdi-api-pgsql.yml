@@ -1,0 +1,70 @@
+
+# 
+#  This Source Code Form is subject to the terms of the Mozilla Public License, v.
+#  2.0 with a Healthcare Disclaimer.
+#  A copy of the Mozilla Public License, v. 2.0 with the Healthcare Disclaimer can
+#  be found under the top level directory, named LICENSE.
+#  If a copy of the MPL was not distributed with this file, You can obtain one at
+#  http://mozilla.org/MPL/2.0/.
+#  If a copy of the Healthcare Disclaimer was not distributed with this file, You
+#  can obtain one at the project website https://github.com/igia.
+# 
+#  Copyright (C) 2021-2022 Persistent Systems, Inc.
+# 
+
+
+
+version: '3.2'
+
+services:
+    i2b2-cdi-api:
+        image: i2b2/i2b2-cdi-api:latest
+        container_name: i2b2-cdi-api
+        volumes:
+            - "./resources/wait-for-it.sh:/wait-for-it.sh"
+        command: 
+            - /bin/sh -c "apk add --no-cache bash" 
+            - /bin/bash -c "chmod +x /wait-for-it.sh && ./wait-for-it.sh --strict --quiet"
+        environment:
+            - 'SPRING_PROFILES_ACTIVE=${I2B2_SPRING_PROFILES_ACTIVE:-dev}'
+            - 'SPRING_DATASOURCE_URL=jdbc:postgresql://i2b2-pg:${I2B2_POSTGRESQL_PORT:-5432}/i2b2?currentSchema=i2b2demodata'
+            - 'SPRING_DATASOURCE_DRIVER=org.postgresql.Driver'
+            - 'SPRING_DATASOURCE_USERNAME=${I2B2_DATASOURCE_USERNAME:-i2b2}'
+            - 'SPRING_DATASOURCE_PASSWORD=${I2B2_DATASOURCE_PASSWORD:-demouser}'
+            - 'ONTOLOGY_DATASOURCE_URL=jdbc:postgresql://i2b2-pg:${I2B2_POSTGRESQL_PORT:-5432}/i2b2?currentSchema=i2b2metadata'
+            - 'ONTOLOGY_DATASOURCE_DRIVER=org.postgresql.Driver'
+            - 'ONTOLOGY_DATASOURCE_USERNAME=${I2B2_ONTOLOGY_DATASOURCE_USERNAME:-i2b2}'
+            - 'ONTOLOGY_DATASOURCE_PASSWORD=${I2B2_ONTOLOGY_DATASOURCE_PASSWORD:-demouser}'
+            - 'WAIT_FOR=i2b2-pg:${I2B2_POSTGRESQL_PORT:-5432}'
+            - 'WAIT_FOR_TIMEOUT=60'
+        ports:
+            - '${I2B2_CDI_API_PORT:-5002}:5002'
+        depends_on:
+            - '${I2B2_COMMONS_DATASOURCE_SERVICE:-i2b2-pg}'
+        restart: unless-stopped
+        networks:
+            - i2b2net
+
+    i2b2-pg:
+        image: i2b2/i2b2-pg:p1
+        container_name: i2b2-pg
+        ports:
+            - '${I2B2_POSTGRESQL_PORT:-5432}:5432'
+        networks:
+            - i2b2net
+
+    i2b2-wildfly:
+        networks:
+            - i2b2net
+        depends_on:
+            - '${I2B2_COMMONS_DATASOURCE_SERVICE:-i2b2-pg}'
+
+    i2b2-web:
+        networks:
+            - i2b2net
+        depends_on:
+            - i2b2-wildfly
+
+networks:
+    i2b2net:
+       driver: bridge
