@@ -1,0 +1,66 @@
+# 
+#  This Source Code Form is subject to the terms of the Mozilla Public License, v.
+#  2.0 with a Healthcare Disclaimer.
+#  A copy of the Mozilla Public License, v. 2.0 with the Healthcare Disclaimer can
+#  be found under the top level directory, named LICENSE.
+#  If a copy of the MPL was not distributed with this file, You can obtain one at
+#  http://mozilla.org/MPL/2.0/.
+#  If a copy of the Healthcare Disclaimer was not distributed with this file, You
+#  can obtain one at the project website https://github.com/igia.
+# 
+#  Copyright (C) 2021-2022 Persistent Systems, Inc.
+# 
+
+
+
+spring:
+    application:
+        name: I2B2 RESTful Interface
+    profiles:
+        active: #spring.profiles.active#
+    jmx:
+        enabled: false
+    security:
+        user:
+            name: i2b2
+            password: i2b2
+    resources:
+      add-mappings: true
+    mvc:
+      throw-exception-if-no-handler-found: true
+    datasource:
+        url:
+        username:
+        password:
+        driver:
+    integration:
+        sftp:
+            host: localhost
+            port: 2222
+            user: i2b2sftpuser
+            password: i2b2sftppass
+            remoteDirPath: /data/
+            localDirPath: /tmp/data
+server:
+    port: 5002
+
+ontology:
+    datasource:
+        url:
+        username:
+        password:
+        driver:
+
+application:
+    lenient-validation: false
+    source-system-code: DEMO
+    project-id: PRJ001
+    patient-source: DEMO
+    patient-status: A
+    encounter-source: DEMO
+    encounter-status: A
+ 
+query-master: 
+   prefix: USE [i2b2demodata] SET ANSI_NULLS ON SET QUOTED_IDENTIFIER ON BEGIN DROP TABLE IF EXISTS \#global_temp_table; CREATE TABLE \#global_temp_table (patient_num int, panel_count int); DROP TABLE IF EXISTS \#dx; CREATE TABLE \#dx (patient_num int ); DROP TABLE IF EXISTS dummy; CREATE TABLE dummy (value VARCHAR(1));
+   postfix: END declare @DERIVED_CONCEPT_NAME varchar(50) ='derived:variabletemplate' delete from OBSERVATION_FACT where concept_cd=@DERIVED_CONCEPT_NAME; insert into OBSERVATION_FACT select '0' as 'ENCOUNTER_NUM', a.PATIENT_NUM, @DERIVED_CONCEPT_NAME as 'CONCEPT_CD', '@' as 'PROVIDER_ID', CURRENT_TIMESTAMP as 'START_DATE', '@' as 'MODIFIER_CD', 0 as 'INSTANCE_NUM', 'T' as 'VALTYPE_CD', NULL as 'TVAL_CHAR', NULL as 'NVAL_NUM', NULL as 'VALUEFLAG_CD', NULL as 'QUANTITY_NUM', NULL as 'UNITS_CD', NULL as 'END_DATE', NULL as 'LOCATION_CD', NULL as 'OBSERVATION_BLOB', NULL as 'CONFIDENCE_NUM', CURRENT_TIMESTAMP as 'UPDATE_DATE', NULL as 'DOWNLOAD_DATE', NULL as 'IMPORT_DATE', NULL as 'SOURCESYSTEM_CD', NULL as 'UPLOAD_ID' from (select * from \#dx) a; SELECT NULL AS 'value' FROM dummy
+   concept-code-template: derived:variabletemplate

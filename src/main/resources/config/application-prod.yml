@@ -1,0 +1,44 @@
+# 
+#  This Source Code Form is subject to the terms of the Mozilla Public License, v.
+#  2.0 with a Healthcare Disclaimer.
+#  A copy of the Mozilla Public License, v. 2.0 with the Healthcare Disclaimer can
+#  be found under the top level directory, named LICENSE.
+#  If a copy of the MPL was not distributed with this file, You can obtain one at
+#  http://mozilla.org/MPL/2.0/.
+#  If a copy of the Healthcare Disclaimer was not distributed with this file, You
+#  can obtain one at the project website https://github.com/igia.
+# 
+#  Copyright (C) 2021-2022 Persistent Systems, Inc.
+# 
+
+
+
+spring:
+    datasource:
+        url: jdbc:sqlserver://localhost:1433;databaseName=i2b2demodata
+        username: sa
+        password: <YourStrong@Passw0rd>
+        driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    integration:
+        sftp:
+            host: localhost
+            port: 2222
+            user: i2b2sftpuser
+            password: i2b2sftppass
+            remoteDirPath: /data/
+            localDirPath: /tmp/data
+
+logging:
+    level:
+        sql: WARN
+        org.springframework.jdbc: WARN
+        org.springframework.transaction: WARN
+        io.igia: INFO
+
+ontology:
+    datasource:
+        url: jdbc:sqlserver://localhost:1433;databaseName=i2b2metadata
+        username: sa
+        password: <YourStrong@Passw0rd>
+        driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
+

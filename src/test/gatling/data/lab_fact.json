@@ -1,0 +1,11 @@
+{   
+    "encounterId": "LE${prefix}${index}",
+    "patientId": "${patientId}${prefix}",
+    "providerId": "LCS-I2B2:D000109075",
+    "conceptCode": "NDC:53489051010",
+    "startDate": "2018-03-31T00:00:00",
+    "endDate": "2018-03-31T00:00:00",
+    "value": "20",
+    "units": "mg",
+    "modifiers": []
+}

@@ -1,0 +1,90 @@
+
+# 
+#  This Source Code Form is subject to the terms of the Mozilla Public License, v.
+#  2.0 with a Healthcare Disclaimer.
+#  A copy of the Mozilla Public License, v. 2.0 with the Healthcare Disclaimer can
+#  be found under the top level directory, named LICENSE.
+#  If a copy of the MPL was not distributed with this file, You can obtain one at
+#  http://mozilla.org/MPL/2.0/.
+#  If a copy of the Healthcare Disclaimer was not distributed with this file, You
+#  can obtain one at the project website https://github.com/igia.
+# 
+#  Copyright (C) 2021-2022 Persistent Systems, Inc.
+# 
+
+
+
+version: '3.2'
+
+services:
+    i2b2-cdi-api:
+        image: i2b2/i2b2-cdi-api:latest
+        container_name: i2b2-cdi-api
+        volumes:
+            - "./resources/wait-for-it.sh:/wait-for-it.sh"
+        command: 
+            - /bin/sh -c "apk add --no-cache bash" 
+            - /bin/bash -c "chmod +x /wait-for-it.sh && ./wait-for-it.sh --strict --quiet"
+        environment:
+            - 'SPRING_PROFILES_ACTIVE=${I2B2_SPRING_PROFILES_ACTIVE:-prod}'
+            - 'SPRING_DATASOURCE_URL=jdbc:sqlserver://i2b2-mssql:${I2B2_MSSQL_PORT:-1433};databaseName=i2b2demodata'
+            - 'SPRING_DATASOURCE_DRIVER=com.microsoft.sqlserver.jdbc.SQLServerDriver'
+            - 'SPRING_DATASOURCE_USERNAME=${I2B2_DATASOURCE_USERNAME:-sa}'
+            - 'SPRING_DATASOURCE_PASSWORD=${I2B2_DATASOURCE_PASSWORD:-<YourStrong@Passw0rd>}'
+            - 'ONTOLOGY_DATASOURCE_URL=jdbc:sqlserver://i2b2-mssql:${I2B2_MSSQL_PORT:-1433};databaseName=i2b2metadata'
+            - 'ONTOLOGY_DATASOURCE_DRIVER=com.microsoft.sqlserver.jdbc.SQLServerDriver'
+            - 'ONTOLOGY_DATASOURCE_USERNAME=${I2B2_ONTOLOGY_DATASOURCE_USERNAME:-sa}'
+            - 'ONTOLOGY_DATASOURCE_PASSWORD=${I2B2_ONTOLOGY_DATASOURCE_PASSWORD:-<YourStrong@Passw0rd>}'
+            - 'WAIT_FOR=i2b2-mssql:${I2B2_MSSQL_PORT:-1433}'
+            - 'WAIT_FOR_TIMEOUT=60'
+        ports:
+            - '${I2B2_CDI_API_PORT:-5002}:5002'
+        depends_on:
+            - '${I2B2_COMMONS_DATASOURCE_SERVICE:-i2b2-mssql}'
+        restart: unless-stopped
+        networks:
+            - i2b2net
+
+    i2b2-mssql-vol-loader:
+        image: i2b2/i2b2-mssql-vol:third
+        container_name: i2b2-mssql-vol-loader
+        volumes:
+            - i2b2-mssql-vol:/var/opt/mssql
+        entrypoint: /bin/sh
+        networks:
+            - i2b2net
+
+    i2b2-mssql:
+        image: mcr.microsoft.com/mssql/server:2017-latest
+        container_name: i2b2-mssql
+        volumes:
+            - i2b2-mssql-vol:/var/opt/mssql
+        ports:
+            - "${I2B2_MSSQL_PORT:-1433}:1433"
+        environment:
+            - ACCEPT_EULA=Y
+            - 'SA_PASSWORD=${I2B2_DATASOURCE_PASSWORD:-<YourStrong@Passw0rd>}'
+        depends_on:
+            - i2b2-mssql-vol-loader        
+        networks:
+            - i2b2net
+
+    i2b2-wildfly:
+        networks:
+            - i2b2net
+        depends_on:
+            - '${I2B2_COMMONS_DATASOURCE_SERVICE:-i2b2-mssql}'
+
+    i2b2-web:
+        networks:
+            - i2b2net
+        depends_on:
+            - i2b2-wildfly
+
+volumes:
+  i2b2-mssql-vol:
+    driver: local
+
+networks:
+    i2b2net:
+       driver: bridge

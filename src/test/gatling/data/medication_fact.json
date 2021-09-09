@@ -1,0 +1,31 @@
+{
+    "encounterId": "ME${prefix}${index}",
+    "patientId": "${patientId}${prefix}",
+    "providerId": "LCS-I2B2:D000109075",
+    "conceptCode": "NDC:53489051010",
+    "startDate": "2018-03-31T00:00:00",
+    "endDate": "2018-03-31T00:00:00",
+    "modifiers" : [
+        {
+            "modifierCode" : "MED:FREQ",
+            "value" : "QD"
+        },
+        {
+            "modifierCode" : "MED:DOSE",
+            "value" : "50",
+            "units": "mg"
+        },
+        {
+            "modifierCode" : "MED:ROUTE",
+            "value" : "PO"
+        },
+        {
+            "modifierCode" : "MED:SIG",
+            "value" : "1 Tablet (50 mg) PO QS PRN Insomnia"
+        },
+        {
+            "modifierCode" : "MED:INST",
+            "value" : "Take 1 (one) 50 mg tablet by mouth at bedtime as needed for insomnia"
+        }
+    ]
+}
